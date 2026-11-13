@@ -1,0 +1,37 @@
+from collections import deque
+
+class Solution(object):
+    def countNonDecreasingSubarrays(self, nums, k):
+        """
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """
+        n = len(nums)
+        ans = 0
+        cost = 0
+        dq = deque()  # Stores indices with values in non-increasing order
+        j = n - 1     # Right pointer of the valid sliding window
+
+        for i in range(n - 1, -1, -1):
+            num = nums[i]
+            
+            # Elements smaller than current num will now be raised to match num
+            while dq and nums[dq[-1]] < num:
+                l = dq.pop()
+                r = dq[-1] if dq else j + 1
+                cost += (r - l) * (num - nums[l])
+                
+            dq.append(i)
+            
+            # Shrink the right end of the window until cost is within budget k
+            while cost > k:
+                cost -= nums[dq[0]] - nums[j]
+                if dq[0] == j:
+                    dq.popleft()
+                j -= 1
+                
+            # Every subarray starting at i and ending at any index in [i, j] is valid
+            ans += j - i + 1
+            
+        return ans
